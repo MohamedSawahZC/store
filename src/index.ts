@@ -3,7 +3,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import RateLimit, { rateLimit } from 'express-rate-limit';
 import errorMiddleware from './middleware/error.middleware';
-
+import config from './config';
+import database from './database';
 const server: Application = express();
 
 server.use(morgan('common')); // Logger middleware to show any request happent in server
@@ -11,6 +12,16 @@ server.use(morgan('common')); // Logger middleware to show any request happent i
 server.use(helmet()); //For HTTP Security
 
 server.use(express.json()); //For parsing json bodies
+
+database.connect().then((client) => {
+  return client
+    .query('SELECT NOW()')
+    .then((res) => {
+      client.release();
+      console.log(res.rows);
+    })
+    .catch((error) => console.log(error));
+});
 
 server.use(errorMiddleware);
 //================= handle rate limit for security from spam bots =====================
@@ -39,9 +50,8 @@ server.get('/', (req: Request, res: Response) => {
   });
 });
 
-const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Server is working successfully in ${PORT}`);
+server.listen(config.port, () => {
+  console.log(`Server is working successfully in ${config.port}`);
 });
 
 export default server;
