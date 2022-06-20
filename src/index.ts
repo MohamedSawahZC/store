@@ -1,10 +1,11 @@
 import express, { Application, Request, Response } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import RateLimit, { rateLimit } from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import errorMiddleware from './middleware/error.middleware';
 import config from './config';
 import database from './database';
+import routes from './routes/index';
 const server: Application = express();
 
 server.use(morgan('common')); // Logger middleware to show any request happent in server
@@ -18,10 +19,11 @@ database.connect().then((client) => {
     .query('SELECT NOW()')
     .then((res) => {
       client.release();
-      console.log(res.rows);
     })
     .catch((error) => console.log(error));
 });
+
+server.use('/api', routes);
 
 server.use(errorMiddleware);
 //================= handle rate limit for security from spam bots =====================
@@ -44,11 +46,6 @@ server.use((_req: Request, res: Response) => {
 });
 
 //=================================================
-server.get('/', (req: Request, res: Response) => {
-  res.send({
-    message: 'Welcome dude',
-  });
-});
 
 server.listen(config.port, () => {
   console.log(`Server is working successfully in ${config.port}`);
