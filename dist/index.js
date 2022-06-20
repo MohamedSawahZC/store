@@ -10,6 +10,7 @@ const express_rate_limit_1 = require("express-rate-limit");
 const error_middleware_1 = __importDefault(require("./middleware/error.middleware"));
 const config_1 = __importDefault(require("./config"));
 const database_1 = __importDefault(require("./database"));
+const index_1 = __importDefault(require("./routes/index"));
 const server = (0, express_1.default)();
 server.use((0, morgan_1.default)('common')); // Logger middleware to show any request happent in server
 server.use((0, helmet_1.default)()); //For HTTP Security
@@ -19,10 +20,10 @@ database_1.default.connect().then((client) => {
         .query('SELECT NOW()')
         .then((res) => {
         client.release();
-        console.log(res.rows);
     })
         .catch((error) => console.log(error));
 });
+server.use('/api', index_1.default);
 server.use(error_middleware_1.default);
 //================= handle rate limit for security from spam bots =====================
 server.use((0, express_rate_limit_1.rateLimit)({
@@ -39,11 +40,6 @@ server.use((_req, res) => {
     });
 });
 //=================================================
-server.get('/', (req, res) => {
-    res.send({
-        message: 'Welcome dude',
-    });
-});
 server.listen(config_1.default.port, () => {
     console.log(`Server is working successfully in ${config_1.default.port}`);
 });

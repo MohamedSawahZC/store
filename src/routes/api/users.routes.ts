@@ -5,6 +5,14 @@ const routes = Router();
 
 routes.get('/', controllers.get);
 
+routes.get('/all', controllers.getMany);
+
+routes.get('/:id', controllers.getOne);
+
 routes.post('/create', controllers.create);
+
+routes.patch('/:id', controllers.updateOne);
+
+routes.delete('/:id', controllers.deleteOne);
 
 export default routes;
