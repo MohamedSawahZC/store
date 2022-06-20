@@ -32,4 +32,5 @@ routes.get('/:id', controllers.getOne);
 routes.post('/create', controllers.create);
 routes.patch('/:id', controllers.updateOne);
 routes.delete('/:id', controllers.deleteOne);
+routes.post('/login', controllers.authenticate);
 exports.default = routes;

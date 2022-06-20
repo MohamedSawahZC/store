@@ -15,4 +15,6 @@ routes.patch('/:id', controllers.updateOne);
 
 routes.delete('/:id', controllers.deleteOne);
 
+routes.post('/login', controllers.authenticate);
+
 export default routes;

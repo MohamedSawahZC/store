@@ -13,6 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const database_1 = __importDefault(require("../database"));
+const config_1 = __importDefault(require("../config"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const hashPassword = (password) => {
+    const salt = parseInt(config_1.default.salt_round, 10);
+    return bcrypt_1.default.hashSync(`${password}${config_1.default.secret_key}`, salt);
+};
 class UserModel {
     //Create new user
     create(u) {
@@ -27,7 +33,7 @@ class UserModel {
                     u.user_name,
                     u.first_name,
                     u.last_name,
-                    u.password,
+                    hashPassword(u.password),
                 ]);
                 //Release connection
                 connection.release();
@@ -82,7 +88,7 @@ class UserModel {
                     u.user_name,
                     u.first_name,
                     u.last_name,
-                    u.password,
+                    hashPassword(u.password),
                     u.id,
                 ]);
                 connection.release();
@@ -102,6 +108,29 @@ class UserModel {
                 const result = yield connection.query(sql, [id]);
                 connection.release();
                 return result.rows[0];
+            }
+            catch (error) {
+                throw new Error(`${error}`);
+            }
+        });
+    }
+    //auth user
+    authenticate(email, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const connection = yield database_1.default.connect();
+                const sql = 'SELECT password FROM users WHERE email=$1';
+                const result = yield connection.query(sql, [email]);
+                if (result.rows.length) {
+                    const { password: hashPassword } = result.rows[0];
+                    const isPasswordvalid = bcrypt_1.default.compareSync(`${password}${config_1.default.secret_key}`, hashPassword);
+                    if (isPasswordvalid) {
+                        const userInfo = yield connection.query('SELECT id,email,user_name,first_name,last_name FROM users WHERE email=($1)', [email]);
+                        return userInfo.rows[0];
+                    }
+                }
+                connection.release();
+                return null;
             }
             catch (error) {
                 throw new Error(`${error}`);

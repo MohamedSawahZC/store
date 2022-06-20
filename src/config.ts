@@ -13,6 +13,7 @@ const {
   NODE_ENV,
   SECRET_KEY,
   SALT_ROUND,
+  TOKEN_SECRET,
 } = process.env;
 export default {
   port: PORT,
@@ -23,4 +24,5 @@ export default {
   password: POSTGRES_PASSWORD,
   secret_key: SECRET_KEY,
   salt_round: SALT_ROUND,
+  secret_token: TOKEN_SECRET,
 };
